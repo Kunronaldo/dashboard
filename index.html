@@ -3,148 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>富安花園資訊看板</title>
+<title>富安花園看板</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; }
-  body {
-    background:#000; color:#fff;
-    font-family:-apple-system,"PingFang HK","Helvetica Neue",sans-serif;
-    height:100vh; overflow:hidden; padding:18px;
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;}
+  body{
+    color:#eee;
+    font-family:-apple-system,"PingFang HK","Helvetica Neue",Arial,sans-serif;
+    height:100vh;overflow:hidden;
+    background:#05060f url('bg.jpg') center/cover no-repeat;
   }
-  .grid {
-    display:grid;
-    grid-template-columns:1.15fr 1fr;
-    grid-template-rows:auto auto 1fr;
-    gap:16px; height:100%;
+  .overlay{position:fixed;inset:0;z-index:1;
+    background:linear-gradient(90deg,rgba(3,5,15,.72) 0%,rgba(3,5,15,.42) 45%,rgba(3,5,15,.5) 100%);}
+
+  .panel{
+    position:relative;z-index:2;
+    width:100%;height:100%;padding:22px 26px;
+    display:grid;grid-template-columns:2fr 3fr;gap:22px;
   }
 
-  /* 時鐘 */
-  .clock-box{background:#111;border-radius:16px;padding:18px 28px;position:relative;
-    display:flex;flex-direction:column;justify-content:center;}
-  .clock-time{font-size:110px;font-weight:800;letter-spacing:3px;line-height:1;
-    display:flex;align-items:center;text-shadow:0 2px 6px rgba(0,0,0,.8);}
-  .clock-time .colon{animation:blink 1s steps(2,start) infinite;margin:0 6px;}
-  @keyframes blink{to{opacity:0;}}
-  .clock-ampm{position:absolute;top:22px;right:28px;font-size:22px;font-weight:700;}
-  .clock-date{font-size:22px;margin-top:8px;letter-spacing:2px;}
+  /* ===== 左邊巴士 ===== */
+  .bus{display:flex;flex-direction:column;justify-content:space-around;}
+  .brow{display:grid;grid-template-columns:104px 1fr 1fr 1fr;align-items:center;gap:8px;}
+  .badge{
+    background:#eee;color:#000;font-weight:800;font-size:30px;
+    text-align:center;padding:6px 0;border-radius:4px;letter-spacing:1px;
+    box-shadow:0 0 12px rgba(255,255,255,.15);
+  }
+  .eta{font-size:26px;font-weight:700;text-align:center;color:#eee;
+       text-shadow:0 1px 6px rgba(0,0,0,.8);}
+  .eta .num{font-size:38px;}
+  .eta .unit{font-size:18px;margin-left:2px;color:#bcc;}
+  .eta.c2,.eta.c3{border-left:2px solid rgba(255,255,255,.15);}
+  .eta.c2{color:#cdd3ea;}
+  .eta.c3{color:#8891b5;}
+  .eta.c2 .num,.eta.c3 .num{font-size:30px;}
+  .eta.na{color:#555f80;font-size:22px;}
+  .eta.soon{color:#4ade80;text-shadow:0 0 12px rgba(74,222,128,.7);}
 
-  /* 現時天氣 */
-  .now-weather{background:#111;border-radius:16px;padding:18px 26px;
-    display:flex;flex-direction:column;justify-content:center;}
-  .now-weather .loc{font-size:18px;color:#888;}
-  .now-weather .temp{font-size:64px;font-weight:800;line-height:1.1;}
-  .now-weather .desc{font-size:18px;color:#bbb;}
+  /* ===== 右邊 ===== */
+  .side{display:flex;flex-direction:column;gap:18px;}
 
-  /* 天氣預報 */
-  .forecast{grid-column:1/3;display:flex;gap:10px;overflow-x:auto;}
-  .day{background:#1a5fb4;border-radius:8px;min-width:120px;flex:1;padding:12px 6px;
-    text-align:center;box-shadow:0 3px 6px rgba(0,0,0,.5);}
-  .day .d1{font-size:20px;font-weight:700;}
-  .day .d2{font-size:15px;margin:2px 0 6px;}
-  .day .ic{font-size:36px;margin:4px 0;}
-  .day .tp{font-size:19px;font-weight:700;margin-top:6px;}
-  .day .rh{font-size:15px;}
+  /* --- 翻頁時鐘 (上半,最高) --- */
+  .flip{flex:0 0 auto;}
+  .flip-clock{display:flex;align-items:stretch;justify-content:center;gap:14px;position:relative;}
+  .fc-group{display:flex;gap:8px;}
+  .card{
+    position:relative;
+    background:linear-gradient(180deg,#3a3a3a 0%,#2b2b2b 49.5%,#161616 50.5%,#0d0d0d 100%);
+    border-radius:14px;
+    width:112px;height:150px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:120px;font-weight:800;color:#f4f4f4;
+    box-shadow:0 8px 22px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08);
+    line-height:1;
+  }
+  /* 中間分割線 */
+  .card::after{content:'';position:absolute;left:0;right:0;top:50%;height:2px;
+    transform:translateY(-1px);
+    background:rgba(0,0,0,.55);
+    box-shadow:0 1px 0 rgba(255,255,255,.05);}
+  /* 冒號 */
+  .colon{display:flex;flex-direction:column;justify-content:center;gap:26px;padding:0 2px;}
+  .colon span{width:12px;height:12px;border-radius:50%;background:#d8d8d8;
+    box-shadow:0 0 8px rgba(255,255,255,.3);}
+  /* AM/PM 右上 */
+  .ampm{position:absolute;top:4px;right:6px;font-size:22px;font-weight:800;color:#e8e8e8;letter-spacing:1px;}
+  /* 日期 左下 */
+  .fc-date{position:absolute;bottom:6px;left:10px;font-size:20px;font-weight:800;
+    color:#e8e8e8;letter-spacing:2px;text-transform:uppercase;}
 
-  /* 巴士 */
-  .bus-box{grid-column:1/3;background:#111;border-radius:16px;padding:14px 22px;overflow-y:auto;}
-  .bus-title{font-size:20px;font-weight:700;margin-bottom:8px;color:#ffd24d;}
-  .bus-row{display:flex;align-items:center;gap:16px;padding:12px 0;
-    border-bottom:1px solid #222;font-size:24px;}
-  .bus-route{background:#c00;color:#fff;font-weight:800;border-radius:6px;
-    padding:5px 12px;min-width:78px;text-align:center;font-size:24px;}
-  .bus-dest{flex:1;color:#ddd;font-size:20px;}
-  .bus-eta{font-weight:800;color:#4dff88;min-width:150px;text-align:right;}
-  .bus-eta.soon{color:#ff5d5d;}
-  .muted{color:#888;font-size:16px;}
-  .upd{font-size:13px;color:#555;text-align:right;margin-top:6px;}
+  /* --- 天氣 (下半) --- */
+  .weather{flex:1;display:flex;flex-direction:column;justify-content:center;
+           border-top:2px solid rgba(255,255,255,.15);padding-top:14px;}
+  .w-main{display:flex;align-items:center;gap:14px;}
+  .w-icon{font-size:72px;line-height:1;}
+  .w-temp{font-size:72px;font-weight:800;line-height:1;color:#fff;
+          text-shadow:0 2px 14px rgba(0,0,0,.7);}
+  .w-desc{font-size:22px;color:#cdd;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+  .w-fore{display:flex;gap:6px;margin-top:14px;}
+  .w-day{flex:1;text-align:center;border:1.5px solid rgba(255,255,255,.22);
+         border-radius:6px;padding:6px 2px;color:#eef;
+         background:rgba(10,15,40,.35);backdrop-filter:blur(3px);}
+  .w-day .wd{font-size:15px;font-weight:700;}
+  .w-day .wi{font-size:26px;margin:2px 0;}
+  .w-day .wt{font-size:15px;font-weight:700;}
 </style>
 </head>
 <body>
-<div class="grid">
-  <div class="clock-box">
-    <div class="clock-ampm" id="ampm">PM</div>
-    <div class="clock-time"><span id="hh">00</span><span class="colon">:</span><span id="mm">00</span></div>
-    <div class="clock-date" id="date">--</div>
+<div class="overlay"></div>
+
+<div class="panel">
+
+  <!-- 左:巴士 -->
+  <div class="bus" id="busList">
+    <div class="brow"><div class="badge">…</div><div class="eta">載入中</div><div class="eta c2"></div><div class="eta c3"></div></div>
   </div>
 
-  <div class="now-weather">
-    <div class="loc" id="wloc">香港</div>
-    <div class="temp" id="wtemp">--°</div>
-    <div class="desc" id="wdesc">載入中…</div>
+  <!-- 右:翻頁時鐘 + 天氣 -->
+  <div class="side">
+
+    <!-- 翻頁時鐘 -->
+    <div class="flip">
+      <div class="flip-clock">
+        <div class="fc-group">
+          <div class="card" id="h1">0<span class="fc-date" id="fcDate">TUE, 20 APR</span></div>
+          <div class="card" id="h2">4</div>
+        </div>
+        <div class="colon"><span></span><span></span></div>
+        <div class="fc-group">
+          <div class="card" id="m1">0</div>
+          <div class="card" id="m2">3<span class="ampm" id="ampm">PM</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 天氣 -->
+    <div class="weather">
+      <div class="w-main">
+        <div class="w-icon" id="wIcon">☁️</div>
+        <div><div class="w-temp" id="wTemp">--°</div></div>
+      </div>
+      <div class="w-desc" id="wDesc">載入中…</div>
+      <div class="w-fore" id="wFore"></div>
+    </div>
+
   </div>
 
-  <div class="forecast" id="forecast"></div>
-
-  <div class="bus-box">
-    <div class="bus-title">🚌 富安花園 巴士到站</div>
-    <div id="busList"><div class="muted">正在搜尋巴士站…</div></div>
-    <div class="upd" id="busUpd"></div>
-  </div>
 </div>
 
 <script>
-/* ========== 時鐘 ========== */
 const pad=n=>n<10?'0'+n:n;
-const wk=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+const wkFull=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+const wkEn=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const moEn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+/* ===== 翻頁時鐘 ===== */
 function clock(){
-  const d=new Date();let h=d.getHours();
-  const ap=h>=12?'PM':'AM';let h12=h%12||12;
-  hh.textContent=pad(h12);mm.textContent=pad(d.getMinutes());
-  ampm.textContent=ap;
-  date.textContent=`${d.getMonth()+1}月${d.getDate()}日 (${wk[d.getDay()]})`;
+  const d=new Date();
+  let h=d.getHours();
+  const ampm=h>=12?'PM':'AM';
+  let h12=h%12; if(h12===0)h12=12;
+  const hh=pad(h12), mm=pad(d.getMinutes());
+  document.getElementById('h1').firstChild.textContent=hh[0];
+  document.getElementById('h2').firstChild.textContent=hh[1];
+  document.getElementById('m1').firstChild.textContent=mm[0];
+  document.getElementById('m2').firstChild.textContent=mm[1];
+  document.getElementById('ampm').textContent=ampm;
+  document.getElementById('fcDate').textContent=
+    wkEn[d.getDay()]+', '+pad(d.getDate())+' '+moEn[d.getMonth()];
 }
 setInterval(clock,1000);clock();
 
-/* ========== 天氣 (香港天文台) ========== */
+/* ===== 天氣 ===== */
 async function weather(){
   try{
     const cur=await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc').then(r=>r.json());
-    const t=cur.temperature.data.find(x=>x.place==='沙田')||cur.temperature.data.find(x=>x.place==='香港天文台')||cur.temperature.data[0];
-    wtemp.textContent=t.value+'°';wloc.textContent=t.place;
-    if(cur.warningMessage&&cur.warningMessage.length) wdesc.textContent=cur.warningMessage[0];
-    else wdesc.textContent='濕度 '+ (cur.humidity.data[0].value)+'%';
+    const t=cur.temperature.data.find(x=>x.place==='沙田')||cur.temperature.data[0];
+    document.getElementById('wTemp').textContent=t.value+'°';
+    document.getElementById('wDesc').textContent=t.place+' · 濕度 '+cur.humidity.data[0].value+'%';
 
     const fc=await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc').then(r=>r.json());
-    forecast.innerHTML='';
-    fc.weatherForecast.slice(0,6).forEach(day=>{
-      const m=+day.forecastDate.slice(4,6),dd=+day.forecastDate.slice(6,8);
-      const el=document.createElement('div');el.className='day';
-      el.innerHTML=`<div class="d1">${m}月${dd}日</div>
-        <div class="d2">(${day.week})</div>
-        <div class="ic">${icon(day.ForecastIcon)}</div>
-        <div class="tp">${day.forecastMintemp.value} | ${day.forecastMaxtemp.value}℃</div>
-        <div class="rh">${day.forecastMinrh.value}-${day.forecastMaxrh.value}%</div>`;
-      forecast.appendChild(el);
+    document.getElementById('wIcon').textContent=icon(fc.weatherForecast[0].ForecastIcon);
+    const box=document.getElementById('wFore');box.innerHTML='';
+    fc.weatherForecast.slice(1,5).forEach(day=>{
+      const el=document.createElement('div');el.className='w-day';
+      el.innerHTML=`<div class="wd">${day.week}</div>
+        <div class="wi">${icon(day.ForecastIcon)}</div>
+        <div class="wt">${day.forecastMintemp.value}°/${day.forecastMaxtemp.value}°</div>`;
+      box.appendChild(el);
     });
-  }catch(e){wdesc.textContent='天氣載入失敗';}
+  }catch(e){document.getElementById('wDesc').textContent='天氣載入失敗';}
 }
 function icon(c){
   if(c>=60&&c<=65)return'🌧️';
   if(c>=70&&c<=79)return'⛈️';
-  if(c>=50&&c<=53)return'☀️';
+  if(c>=50&&c<=51)return'☀️';
+  if(c>=52&&c<=53)return'🌤️';
   if(c>=54&&c<=59)return'⛅';
   if(c>=80)return'💨';
   return'☁️';
 }
 weather();setInterval(weather,600000);
 
-/* ========== 巴士 (KMB) ========== */
+/* ===== 巴士 (KMB) ===== */
 const STOP_NAME='富安花園';
 const BUSES=[
   {route:'43X',destKw:'荃灣西'},
   {route:'87D',destKw:'紅磡'},
   {route:'89C',destKw:'觀塘'}
 ];
-let stopMap=null;      // stopId -> name_tc
-let resolved=null;     // 已找到的站資料(快取)
+let stopMap=null,resolved=null;
 
 async function buildStopMap(){
   const j=await fetch('https://data.etabus.gov.hk/v1/transport/kmb/stop').then(r=>r.json());
-  stopMap={};
-  j.data.forEach(s=>stopMap[s.stop]=s.name_tc);
+  stopMap={};j.data.forEach(s=>stopMap[s.stop]=s.name_tc);
 }
-
-// 自動搜尋:對應「富安花園」+ 目的地方向
 async function findStop(route,destKw){
   for(const dir of ['outbound','inbound']){
     for(const st of [1,2,3]){
@@ -159,46 +212,41 @@ async function findStop(route,destKw){
   }
   return null;
 }
-
 async function resolveAll(){
   if(!stopMap)await buildStopMap();
   resolved=[];
   for(const b of BUSES){
     const r=await findStop(b.route,b.destKw);
-    resolved.push(r||{route:b.route,dest:b.destKw,error:true});
+    resolved.push(r||{route:b.route,error:true});
   }
 }
-
+function minCell(mins,cls){
+  if(mins===null)return `<div class="eta ${cls} na">N/A</div>`;
+  if(mins<=0)   return `<div class="eta ${cls} soon"><span class="num">即將</span></div>`;
+  const soon=mins<=3?'soon':'';
+  return `<div class="eta ${cls} ${soon}"><span class="num">${mins}</span><span class="unit">分</span></div>`;
+}
 async function loadBus(){
   try{
     if(!resolved)await resolveAll();
-    busList.innerHTML='';
+    const box=document.getElementById('busList');box.innerHTML='';
     for(const r of resolved){
-      if(r.error){addRow(r.route,'往'+r.dest,'找不到站',false);continue;}
-      const j=await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${r.service}`).then(x=>x.json());
-      const etas=j.data.filter(x=>x.dir===r.dir&&x.eta).sort((a,b)=>new Date(a.eta)-new Date(b.eta));
-      if(!etas.length){addRow(r.route,'往'+r.dest,'暫無班次',false);continue;}
-      etas.slice(0,3).forEach((e,i)=>{
-        const min=Math.round((new Date(e.eta)-new Date())/60000);
-        const txt=min<=0?'即將到達':min+' 分鐘';
-        addRow(i===0?r.route:'', i===0?('往'+r.dest):'', txt, min<=2);
-      });
+      let mins=[null,null,null];
+      if(!r.error){
+        const j=await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/eta/${r.stop}/${r.route}/${r.service}`).then(x=>x.json());
+        const etas=j.data.filter(x=>x.dir===r.dir&&x.eta).sort((a,b)=>new Date(a.eta)-new Date(b.eta)).slice(0,3);
+        etas.forEach((e,i)=>{mins[i]=Math.round((new Date(e.eta)-new Date())/60000);});
+      }
+      const row=document.createElement('div');row.className='brow';
+      row.innerHTML=`<div class="badge">${r.route}</div>
+        ${minCell(mins[0],'c1')}${minCell(mins[1],'c2')}${minCell(mins[2],'c3')}`;
+      box.appendChild(row);
     }
-    busUpd.textContent='更新於 '+new Date().toLocaleTimeString('zh-HK');
-  }catch(e){
-    busList.innerHTML='<div class="muted">巴士資料載入失敗,稍後重試</div>';
-  }
-}
-function addRow(route,dest,eta,soon){
-  const row=document.createElement('div');row.className='bus-row';
-  row.innerHTML=`<div class="bus-route">${route||''}</div>
-    <div class="bus-dest">${dest}</div>
-    <div class="bus-eta ${soon?'soon':''}">${eta}</div>`;
-  busList.appendChild(row);
+  }catch(e){}
 }
 loadBus();
-setInterval(loadBus,30000);       // 每 30 秒更新到站
-setInterval(resolveAll,86400000); // 每日重新對應站點
+setInterval(loadBus,30000);
+setInterval(resolveAll,86400000);
 </script>
 </body>
 </html>
