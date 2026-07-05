@@ -9,43 +9,52 @@
   body{
     color:#eee;
     font-family:-apple-system,"PingFang HK","Helvetica Neue",Arial,sans-serif;
-    height:100vh;overflow:hidden;
-    background:#05060f url('bg.jpg') center/cover no-repeat;
+    height:100vh;overflow:hidden;background:#05060f;
+  }
+
+  /* ===== 背景層(blur)===== */
+  .bg{
+    position:fixed;inset:-30px;z-index:0;
+    background:url('bg.jpg') center/cover no-repeat;
+    filter:blur(14px) brightness(.65);   /* blur 程度、暗度可調 */
+    transform:scale(1.06);
   }
   .overlay{position:fixed;inset:0;z-index:1;
-    background:linear-gradient(90deg,rgba(3,5,15,.72) 0%,rgba(3,5,15,.42) 45%,rgba(3,5,15,.5) 100%);}
+    background:linear-gradient(90deg,rgba(3,5,15,.6) 0%,rgba(3,5,15,.4) 45%,rgba(3,5,15,.5) 100%);}
 
+  /* ===== 主佈局 3:2 ===== */
   .panel{
     position:relative;z-index:2;
     width:100%;height:100%;padding:18px 24px;
-    display:grid;grid-template-columns:2fr 3fr;gap:22px;overflow:hidden;
+    display:grid;grid-template-columns:3fr 2fr;gap:22px;overflow:hidden;
   }
 
-  /* ===== 左邊巴士 (8條平均分,唔會 scroll) ===== */
+  /* ===== 左邊巴士(8條平均分,唔 scroll)===== */
   .bus{height:100%;display:flex;flex-direction:column;gap:.8vh;overflow:hidden;}
   .brow{flex:1 1 0;min-height:0;
-        display:grid;grid-template-columns:82px 1fr 1fr 1fr;
-        align-items:center;gap:6px;
+        display:grid;grid-template-columns:96px 1fr 1fr 1fr;
+        align-items:center;gap:8px;
         border-bottom:1px solid rgba(255,255,255,.08);}
   .badge{
-    background:#eee;color:#000;font-weight:800;font-size:3vh;
-    text-align:center;padding:.5vh 0;border-radius:4px;letter-spacing:.5px;
+    background:#eee;color:#000;font-weight:800;font-size:3.4vh;
+    text-align:center;padding:.5vh 0;border-radius:5px;letter-spacing:.5px;
     box-shadow:0 0 12px rgba(255,255,255,.15);
   }
-  .eta{font-size:2.4vh;font-weight:700;text-align:center;color:#eee;
-       text-shadow:0 1px 6px rgba(0,0,0,.8);}
-  .eta .num{font-size:3.6vh;}
-  .eta .unit{font-size:1.7vh;margin-left:2px;color:#bcc;}
+  .eta{text-align:center;color:#eee;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+  .eta .num{font-size:5vh;font-weight:800;}
+  .eta .unit{font-size:2.2vh;margin-left:2px;color:#bcc;}
   .eta.c2,.eta.c3{border-left:2px solid rgba(255,255,255,.15);}
   .eta.c2{color:#cdd3ea;} .eta.c3{color:#8891b5;}
-  .eta.c2 .num,.eta.c3 .num{font-size:2.8vh;}
-  .eta.na{color:#555f80;font-size:2vh;}
-  .eta.soon{color:#4ade80;text-shadow:0 0 12px rgba(74,222,128,.7);}
+  .eta.c2 .num{font-size:3.8vh;}
+  .eta.c3 .num{font-size:3.4vh;}
+  .eta.na{color:#555f80;font-size:2.4vh;}
+  .eta.soon{color:#4ade80;text-shadow:0 0 14px rgba(74,222,128,.7);}
+  .eta.soon .num{font-size:4.4vh;}
 
   /* ===== 右邊 ===== */
   .side{display:flex;flex-direction:column;height:100%;}
 
-  /* --- 翻頁時鐘(line-height 置中,穩定顯示)--- */
+  /* --- 翻頁時鐘 --- */
   .flip{display:flex;flex-direction:column;align-items:center;justify-content:center;
         gap:2vh;padding:2vh 0;}
   .flip-clock{display:flex;align-items:stretch;justify-content:center;gap:1.4vh;}
@@ -54,22 +63,22 @@
     position:relative;
     background:linear-gradient(180deg,#3a3a3a 0%,#2b2b2b 49.5%,#161616 50.5%,#0d0d0d 100%);
     border-radius:1.6vh;
-    width:14vh;height:19vh;
+    width:13vh;height:18vh;
     overflow:hidden;
     box-shadow:0 8px 22px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08);
   }
-  .card .digit{               /* 用 block + line-height 置中,最穩 */
+  .card .digit{
     display:block;width:100%;height:100%;
-    text-align:center;line-height:19vh;   /* = 卡片高度 */
-    font-size:11vh;font-weight:800;color:#f4f4f4;
+    text-align:center;line-height:18vh;
+    font-size:10.5vh;font-weight:800;color:#f4f4f4;
   }
   .card::after{content:'';position:absolute;left:0;right:0;top:50%;height:2px;
     transform:translateY(-1px);
     background:rgba(0,0,0,.55);box-shadow:0 1px 0 rgba(255,255,255,.05);}
-  .colon{display:flex;flex-direction:column;justify-content:center;gap:3.2vh;padding:0 .3vh;}
-  .colon span{width:1.5vh;height:1.5vh;border-radius:50%;background:#d8d8d8;
+  .colon{display:flex;flex-direction:column;justify-content:center;gap:3vh;padding:0 .3vh;}
+  .colon span{width:1.4vh;height:1.4vh;border-radius:50%;background:#d8d8d8;
     box-shadow:0 0 8px rgba(255,255,255,.3);}
-  .ampm{position:absolute;top:.6vh;right:1vh;font-size:2.4vh;font-weight:800;
+  .ampm{position:absolute;top:.6vh;right:1vh;font-size:2.2vh;font-weight:800;
     color:#e8e8e8;letter-spacing:1px;z-index:2;}
   .fc-date{font-size:3vh;font-weight:800;color:#eef;letter-spacing:3px;
     text-shadow:0 2px 8px rgba(0,0,0,.7);}
@@ -91,6 +100,7 @@
 </style>
 </head>
 <body>
+<div class="bg"></div>
 <div class="overlay"></div>
 
 <div class="panel">
@@ -129,6 +139,9 @@ const wkEn=['SUN','MON','TUE','WED','THU','FRI','SAT'];
 const moEn=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
 /* ===== 時鐘 ===== */
+const h1=document.getElementById('h1'),h2=document.getElementById('h2'),
+      m1=document.getElementById('m1'),m2=document.getElementById('m2'),
+      ampm_=document.getElementById('ampm'),fcDate=document.getElementById('fcDate');
 function clock(){
   const d=new Date();let h=d.getHours();
   const ampm=h>=12?'PM':'AM';let h12=h%12;if(h12===0)h12=12;
@@ -138,9 +151,6 @@ function clock(){
   ampm_.textContent=ampm;
   fcDate.textContent=wkEn[d.getDay()]+', '+pad(d.getDate())+' '+moEn[d.getMonth()];
 }
-const h1=document.getElementById('h1'),h2=document.getElementById('h2'),
-      m1=document.getElementById('m1'),m2=document.getElementById('m2'),
-      ampm_=document.getElementById('ampm'),fcDate=document.getElementById('fcDate');
 setInterval(clock,1000);clock();
 
 /* ===== 天氣 ===== */
@@ -182,7 +192,6 @@ const BUSES=[
 ];
 let stopMap=null,resolved=null;
 
-/* ① 一開頭即刻畫晒 8 行(唔使等 API) */
 function renderRows(){
   const box=document.getElementById('busList');box.innerHTML='';
   BUSES.forEach(b=>{
@@ -213,7 +222,6 @@ async function findStop(route,destKw){
   }
   return {route,error:true};
 }
-/* ② 全部路線並行 resolve(唔再排隊)*/
 async function resolveAll(){
   if(!stopMap)await buildStopMap();
   resolved=await Promise.all(BUSES.map(b=>findStop(b.route,b.destKw)));
@@ -227,7 +235,6 @@ function cell(mins,cls){
 async function loadBus(){
   try{
     if(!resolved)await resolveAll();
-    /* ③ 每條線 ETA 並行 fetch */
     await Promise.all(resolved.map(async r=>{
       const row=document.querySelector(`.brow[data-route="${r.route}"]`);
       if(!row)return;
