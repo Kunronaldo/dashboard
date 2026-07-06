@@ -16,7 +16,7 @@
   .bg{
     position:fixed;inset:-30px;z-index:0;
     background:url('bg.jpg') center/cover no-repeat;
-    filter:blur(14px) brightness(.65);   /* blur 程度、暗度可調 */
+    filter:blur(14px) brightness(.65);
     transform:scale(1.06);
   }
   .overlay{position:fixed;inset:0;z-index:1;
@@ -29,7 +29,7 @@
     display:grid;grid-template-columns:3fr 2fr;gap:22px;overflow:hidden;
   }
 
-  /* ===== 左邊巴士(8條平均分,唔 scroll)===== */
+  /* ===== 左邊巴士 ===== */
   .bus{height:100%;display:flex;flex-direction:column;gap:.8vh;overflow:hidden;}
   .brow{flex:1 1 0;min-height:0;
         display:grid;grid-template-columns:96px 1fr 1fr 1fr;
@@ -56,47 +56,57 @@
 
   /* --- 翻頁時鐘 --- */
   .flip{display:flex;flex-direction:column;align-items:center;justify-content:center;
-        gap:2vh;padding:2vh 0;}
+        gap:1.6vh;padding:1.6vh 0;}
   .flip-clock{display:flex;align-items:stretch;justify-content:center;gap:1.4vh;}
   .fc-group{display:flex;gap:1vh;}
   .card{
     position:relative;
     background:linear-gradient(180deg,#3a3a3a 0%,#2b2b2b 49.5%,#161616 50.5%,#0d0d0d 100%);
     border-radius:1.6vh;
-    width:13vh;height:18vh;
+    width:12vh;height:16.5vh;
     overflow:hidden;
     box-shadow:0 8px 22px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08);
   }
   .card .digit{
     display:block;width:100%;height:100%;
-    text-align:center;line-height:18vh;
-    font-size:10.5vh;font-weight:800;color:#f4f4f4;
+    text-align:center;line-height:16.5vh;
+    font-size:9.5vh;font-weight:800;color:#f4f4f4;
   }
   .card::after{content:'';position:absolute;left:0;right:0;top:50%;height:2px;
     transform:translateY(-1px);
     background:rgba(0,0,0,.55);box-shadow:0 1px 0 rgba(255,255,255,.05);}
-  .colon{display:flex;flex-direction:column;justify-content:center;gap:3vh;padding:0 .3vh;}
-  .colon span{width:1.4vh;height:1.4vh;border-radius:50%;background:#d8d8d8;
+  .colon{display:flex;flex-direction:column;justify-content:center;gap:2.6vh;padding:0 .3vh;}
+  .colon span{width:1.3vh;height:1.3vh;border-radius:50%;background:#d8d8d8;
     box-shadow:0 0 8px rgba(255,255,255,.3);}
-  .ampm{position:absolute;top:.6vh;right:1vh;font-size:2.2vh;font-weight:800;
+  .ampm{position:absolute;top:.6vh;right:1vh;font-size:2vh;font-weight:800;
     color:#e8e8e8;letter-spacing:1px;z-index:2;}
-  .fc-date{font-size:3vh;font-weight:800;color:#eef;letter-spacing:3px;
+  .fc-date{font-size:2.8vh;font-weight:800;color:#eef;letter-spacing:3px;
     text-shadow:0 2px 8px rgba(0,0,0,.7);}
 
   /* --- 天氣 --- */
   .weather{flex:1;display:flex;flex-direction:column;justify-content:center;
            border-top:2px solid rgba(255,255,255,.15);padding-top:12px;}
   .w-main{display:flex;align-items:center;gap:14px;}
-  .w-icon{font-size:6vh;line-height:1;}
-  .w-temp{font-size:6vh;font-weight:800;line-height:1;color:#fff;
+  .w-icon{font-size:5.5vh;line-height:1;}
+  .w-temp{font-size:5.5vh;font-weight:800;line-height:1;color:#fff;
           text-shadow:0 2px 14px rgba(0,0,0,.7);}
-  .w-desc{font-size:2.2vh;color:#cdd;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
-  .w-fore{display:flex;gap:6px;margin-top:12px;}
+  .w-desc{font-size:2vh;color:#cdd;margin-top:6px;text-shadow:0 1px 6px rgba(0,0,0,.8);}
+  .w-fore{display:flex;gap:6px;margin-top:10px;}
   .w-day{flex:1;text-align:center;border:1.5px solid rgba(255,255,255,.22);
-         border-radius:6px;padding:6px 2px;color:#eef;background:rgba(10,15,40,.35);}
-  .w-day .wd{font-size:1.6vh;font-weight:700;}
-  .w-day .wi{font-size:2.6vh;margin:2px 0;}
-  .w-day .wt{font-size:1.6vh;font-weight:700;}
+         border-radius:6px;padding:5px 2px;color:#eef;background:rgba(10,15,40,.35);}
+  .w-day .wd{font-size:1.5vh;font-weight:700;}
+  .w-day .wi{font-size:2.4vh;margin:2px 0;}
+  .w-day .wt{font-size:1.5vh;font-weight:700;}
+
+  /* --- 逐小時預報 --- */
+  .w-hourly{display:flex;gap:6px;margin-top:10px;
+            border-top:1.5px solid rgba(255,255,255,.15);padding-top:10px;}
+  .w-hr{flex:1;text-align:center;border:1.5px solid rgba(255,255,255,.22);
+        border-radius:6px;padding:5px 2px;background:rgba(10,15,40,.35);color:#eef;}
+  .w-hr .ht{font-size:1.6vh;font-weight:700;color:#cdd;}
+  .w-hr .hi{font-size:2.6vh;margin:3px 0;}
+  .w-hr .hd{font-size:2vh;font-weight:800;color:#fff;}
+  .w-hr .hr{font-size:1.4vh;color:#7fb3ff;font-weight:700;margin-top:2px;}
 </style>
 </head>
 <body>
@@ -129,6 +139,7 @@
       </div>
       <div class="w-desc" id="wDesc">載入中…</div>
       <div class="w-fore" id="wFore"></div>
+      <div class="w-hourly" id="wHourly"></div>
     </div>
   </div>
 </div>
@@ -153,7 +164,7 @@ function clock(){
 }
 setInterval(clock,1000);clock();
 
-/* ===== 天氣 ===== */
+/* ===== 天氣(HKO 即時 + 9日)===== */
 async function weather(){
   try{
     const cur=await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc').then(r=>r.json());
@@ -177,6 +188,43 @@ function icon(c){
   if(c>=54&&c<=59)return'⛅';if(c>=80)return'💨';return'☁️';
 }
 weather();setInterval(weather,600000);
+
+/* ===== 逐小時預報(Open-Meteo,馬鞍山)===== */
+async function hourly(){
+  try{
+    const url='https://api.open-meteo.com/v1/forecast?latitude=22.425&longitude=114.232'
+      +'&hourly=temperature_2m,precipitation_probability,weathercode'
+      +'&timezone=Asia%2FHong_Kong&forecast_days=2';
+    const j=await fetch(url).then(r=>r.json());
+    const times=j.hourly.time,temps=j.hourly.temperature_2m,
+          rains=j.hourly.precipitation_probability,codes=j.hourly.weathercode;
+    const now=new Date();
+    let start=times.findIndex(t=>new Date(t)>now-60000);
+    if(start<0)start=0;
+    const box=document.getElementById('wHourly');box.innerHTML='';
+    for(let i=start;i<start+4 && i<times.length;i++){
+      const d=new Date(times[i]);
+      const el=document.createElement('div');el.className='w-hr';
+      el.innerHTML=`<div class="ht">${pad(d.getHours())}:00</div>
+        <div class="hi">${wmo(codes[i])}</div>
+        <div class="hd">${Math.round(temps[i])}°</div>
+        <div class="hr">💧${rains[i]}%</div>`;
+      box.appendChild(el);
+    }
+  }catch(e){document.getElementById('wHourly').innerHTML='';}
+}
+function wmo(c){
+  if(c===0)return'☀️';
+  if(c<=2)return'🌤️';
+  if(c===3)return'☁️';
+  if(c>=45&&c<=48)return'🌫️';
+  if(c>=51&&c<=57)return'🌦️';
+  if(c>=61&&c<=67)return'🌧️';
+  if(c>=80&&c<=82)return'🌧️';
+  if(c>=95)return'⛈️';
+  return'☁️';
+}
+hourly();setInterval(hourly,600000);
 
 /* ===== 巴士 ===== */
 const STOP_NAME='富安花園';
