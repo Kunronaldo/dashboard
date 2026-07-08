@@ -1,0 +1,363 @@
+<!DOCTYPE html><html lang="zh-HK"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>巴士到站時間板</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #333;
+    font-family: "Arial", "Microsoft JhengHei", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  /* E-ink 螢幕外框 */
+  .eink-frame {
+    background: #f5f5f0;
+    border: 12px solid #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    padding: 20px 25px;
+    width: 760px;
+    max-width: 100%;
+    position: relative;
+  }
+  .eink-screen {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 10px;
+  }
+
+  /* 左邊路線列表 */
+  .routes { display: flex; flex-direction: column; }
+  .route-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    min-height: 44px;
+  }
+  .route-badge {
+    background: #1a1a1a;
+    color: #fff;
+    font-weight: bold;
+    font-size: 26px;
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: 3px;
+    line-height: 1;
+  }
+  .eta {
+    font-size: 26px;
+    font-weight: bold;
+    color: #1a1a1a;
+    text-align: center;
+    border-left: 2px solid #ccc;
+  }
+  .eta:first-of-type { border-left: none; }
+  .eta.t1 { color: #1a1a1a; }
+  .eta.t2 { color: #555; }
+  .eta.t3 { color: #999; }
+  .eta.na { color: #999; font-weight: normal; }
+
+  /* 右邊面板 */
+  .side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-left: 10px;
+  }
+  .date {
+    font-size: 60px;
+    font-weight: bold;
+    color: #1a1a1a;
+    line-height: 1;
+  }
+  .weekday {
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 24px;
+    padding: 4px 20px;
+    border-radius: 3px;
+    margin: 10px 0;
+  }
+  .clock {
+    font-size: 40px;
+    font-weight: bold;
+    color: #1a1a1a;
+  }
+  .divider {
+    border: none;
+    border-top: 2px solid #1a1a1a;
+    width: 100%;
+    margin: 12px 0;
+  }
+  .cat { align-self: center; margin-top: 5px; }
+  .cat svg { width: 130px; height: auto; }
+
+  /* 控制列 */
+  .controls {
+    background: #222;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    width: 760px;
+    max-width: 100%;
+    color: #eee;
+  }
+  .controls h3 { margin-bottom: 10px; font-size: 16px; color:#aaa;}
+  .add-form { display: flex; gap: 8px; flex-wrap: wrap; align-items:center;}
+  .add-form input, .add-form select, .add-form button {
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background: #333;
+    color: #fff;
+    font-size: 14px;
+  }
+  .add-form button { background:#0a84ff; border:none; cursor:pointer; }
+  .add-form button:hover { background:#0060df; }
+  .tracked-list { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;}
+  .chip {
+    background:#444; padding:5px 10px; border-radius:15px;
+    font-size:13px; display:flex; align-items:center; gap:6px;
+  }
+  .chip button { background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:15px;}
+  .status { font-size:12px; color:#888; margin-top:8px;}
+  .hint { font-size:12px; color:#777; margin-top:6px; line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="eink-frame">
+  <div class="eink-screen">
+    <div class="routes" id="routes">
+      <div class="route-row"><div class="eta na">請喺下面加入路線...</div></div>
+    </div>
+    <div class="side">
+      <div class="date" id="date">--/--</div>
+      <div class="weekday" id="weekday">星期--</div>
+      <div class="clock" id="clock">--:--:--</div>
+      <hr class="divider">
+      <div class="cat">
+        <!-- 貓咪推杯 SVG -->
+        <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#1a1a1a" d="M70 30 L55 5 L80 22
+            L120 22 L145 5 L130 32
+            C155 50 160 100 150 140
+            L70 140 C55 105 50 55 70 30 Z"></path>
+          <circle cx="90" cy="60" r="10" fill="#fff"></circle>
+          <circle cx="120" cy="60" r="10" fill="#fff"></circle>
+          <circle cx="92" cy="61" r="4.5" fill="#1a1a1a"></circle>
+          <circle cx="118" cy="61" r="4.5" fill="#1a1a1a"></circle>
+          <path d="M148 118 Q172 112 182 128" stroke="#1a1a1a" stroke-width="7" fill="none" stroke-linecap="round"></path>
+          <ellipse cx="185" cy="145" rx="14" ry="6" fill="none" stroke="#1a1a1a" stroke-width="3"></ellipse>
+          <path d="M198 140 q9 -1 5 7" stroke="#1a1a1a" stroke-width="3" fill="none"></path>
+          <path d="M168 122 l-4 -8 M176 120 l0 -9 M184 122 l4 -8" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <h3>➕ 加入巴士路線 (九巴 KMB)</h3>
+  <div class="add-form">
+    <input id="routeInput" placeholder="路線號 (例: 11X)" style="width:120px">
+    <button id="searchBtn">搜尋方向</button>
+    <select id="dirSelect" style="display:none;min-width:200px"></select>
+    <select id="stopSelect" style="display:none;min-width:220px"></select>
+    <button id="addBtn" style="display:none">加入</button>
+  </div>
+  <div class="tracked-list" id="trackedList"></div>
+  <div class="status" id="status"></div>
+  <div class="hint">
+    使用九巴開放數據 API (data.etabus.gov.hk)。輸入路線號 → 選方向 → 選車站 → 加入。
+    每 30 秒自動更新。資料會存喺瀏覽器 localStorage。
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  "use strict";
+
+  const API = "https://data.etabus.gov.hk/v1/transport/kmb";
+  let currentRoute = null;
+  let tracked = [];
+  try {
+    tracked = JSON.parse(localStorage.getItem("trackedBus") || "[]");
+  } catch (e) { tracked = []; }
+
+  const $ = id => document.getElementById(id);
+
+  // ===== 時鐘同日期 =====
+  function updateClock() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    $("date").textContent = pad(now.getMonth() + 1) + "/" + pad(now.getDate());
+    const days = ["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+    $("weekday").textContent = days[now.getDay()];
+    $("clock").textContent =
+      pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ===== 搜尋路線方向 =====
+  async function loadRoute() {
+    const route = $("routeInput").value.trim().toUpperCase();
+    if (!route) return;
+    setStatus("載入路線 " + route + " ...");
+    try {
+      const res = await fetch(`${API}/route/`);
+      const data = await res.json();
+      const matches = data.data.filter(r => r.route === route);
+      if (matches.length === 0) { setStatus("搵唔到路線 " + route); return; }
+      currentRoute = route;
+      const dirSel = $("dirSelect");
+      dirSel.innerHTML = "";
+      matches.forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = JSON.stringify({ dir: r.bound, st: r.service_type });
+        opt.textContent = `往 ${r.dest_tc} (${r.bound === 'O' ? '去程' : '回程'})`;
+        dirSel.appendChild(opt);
+      });
+      dirSel.style.display = "inline-block";
+      dirSel.onchange = loadStops;
+      loadStops();
+      setStatus("");
+    } catch (e) { setStatus("載入失敗: " + e.message); }
+  }
+
+  // ===== 載入車站列表 =====
+  async function loadStops() {
+    const dirSel = $("dirSelect");
+    const { dir, st } = JSON.parse(dirSel.value);
+    const boundFull = dir === 'O' ? 'outbound' : 'inbound';
+    setStatus("載入車站...");
+    try {
+      const rs = await fetch(`${API}/route-stop/${currentRoute}/${boundFull}/${st}`);
+      const rsData = (await rs.json()).data;
+      const stopSel = $("stopSelect");
+      stopSel.innerHTML = "<option>載入中...</option>";
+      const stopInfos = await Promise.all(rsData.map(async s => {
+        const r = await fetch(`${API}/stop/${s.stop}`);
+        const d = (await r.json()).data;
+        return { stopId: s.stop, name: d.name_tc, seq: s.seq };
+      }));
+      stopSel.innerHTML = "";
+      stopInfos.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = JSON.stringify({ stopId: s.stopId, st });
+        opt.textContent = `${s.seq}. ${s.name}`;
+        stopSel.appendChild(opt);
+      });
+      stopSel.style.display = "inline-block";
+      $("addBtn").style.display = "inline-block";
+      setStatus("");
+    } catch (e) { setStatus("載入車站失敗: " + e.message); }
+  }
+
+  // ===== 加入 / 移除追蹤 =====
+  function addTracked() {
+    const stopSel = $("stopSelect");
+    if (!stopSel.value) return;
+    const { stopId, st } = JSON.parse(stopSel.value);
+    const stopName = stopSel.options[stopSel.selectedIndex].text;
+    if (tracked.some(t => t.route === currentRoute && t.stopId === stopId)) {
+      setStatus("已經加咗喇"); return;
+    }
+    tracked.push({ route: currentRoute, stopId, st, stopName });
+    save();
+    renderTracked();
+    refreshETA();
+  }
+
+  function removeTracked(i) {
+    tracked.splice(i, 1);
+    save();
+    renderTracked();
+    refreshETA();
+  }
+
+  function save() { localStorage.setItem("trackedBus", JSON.stringify(tracked)); }
+
+  function renderTracked() {
+    const el = $("trackedList");
+    el.innerHTML = "";
+    tracked.forEach((t, i) => {
+      const chip = document.createElement("div");
+      chip.className = "chip";
+      const shortName = t.stopName.split('.').slice(1).join('.').trim() || t.stopName;
+      const span = document.createElement("span");
+      span.textContent = `${t.route} @ ${shortName}`;
+      const btn = document.createElement("button");
+      btn.textContent = "✕";
+      btn.onclick = () => removeTracked(i);
+      chip.appendChild(span);
+      chip.appendChild(btn);
+      el.appendChild(chip);
+    });
+  }
+
+  // ===== 更新到站時間 =====
+  async function refreshETA() {
+    const container = $("routes");
+    if (tracked.length === 0) {
+      container.innerHTML =
+        '<div class="route-row"><div class="eta na">請喺下面加入路線...</div></div>';
+      return;
+    }
+    container.innerHTML = "";
+    for (const t of tracked) {
+      const row = document.createElement("div");
+      row.className = "route-row";
+      row.innerHTML = `<div class="route-badge">${t.route}</div>
+        <div class="eta">...</div><div class="eta">...</div><div class="eta">...</div>`;
+      container.appendChild(row);
+      try {
+        const res = await fetch(`${API}/eta/${t.stopId}/${t.route}/${t.st}`);
+        const etas = (await res.json()).data
+          .filter(e => e.eta)
+          .map(e => {
+            const d = new Date(e.eta);
+            return String(d.getHours()).padStart(2, '0') + ":" +
+                   String(d.getMinutes()).padStart(2, '0');
+          });
+        const cells = row.querySelectorAll(".eta");
+        for (let i = 0; i < 3; i++) {
+          cells[i].className = "eta t" + (i + 1);
+          if (etas[i]) cells[i].textContent = etas[i];
+          else { cells[i].textContent = "N/A"; cells[i].classList.add("na"); }
+        }
+      } catch (e) {
+        row.querySelectorAll(".eta").forEach(c => {
+          c.textContent = "ERR"; c.classList.add("na");
+        });
+      }
+    }
+    setStatus("更新於 " + new Date().toLocaleTimeString());
+  }
+
+  function setStatus(msg) { $("status").textContent = msg; }
+
+  // ===== 綁定按鈕 =====
+  $("searchBtn").onclick = loadRoute;
+  $("addBtn").onclick = addTracked;
+  $("routeInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") loadRoute();
+  });
+
+  // ===== 初始化 =====
+  renderTracked();
+  refreshETA();
+  setInterval(refreshETA, 30000);
+});
+</script>
+
+
+</body></html>
